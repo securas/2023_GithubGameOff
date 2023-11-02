@@ -1,0 +1,4 @@
+[gd_scene format=3 uid="uid://bkvi3qa51ph1u"]
+
+[node name="main" type="Node2D"]
+metadata/_edit_lock_ = true

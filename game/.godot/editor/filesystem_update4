@@ -1,0 +1,3 @@
+res://screens/main.tscn
+res://singletons/game.gd
+res://singletons/sigmgr.gd
