@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3 uid="uid://c41ggaf16ri4n"]
+
+[ext_resource type="Script" path="res://world/world.gd" id="1_hr5od"]
+[ext_resource type="Resource" uid="uid://bgkl35ygbxdvg" path="res://ldtk/maps.ldtk" id="2_8hbjv"]
+[ext_resource type="PackedScene" uid="uid://c60g4o60txj2n" path="res://entities/player/player.tscn" id="2_shbt8"]
+[ext_resource type="Script" path="res://general_purpose/fade_layer.gd" id="4_52m43"]
+
+[node name="world" type="Node2D"]
+script = ExtResource("1_hr5od")
+map = ExtResource("2_8hbjv")
+base_level_scene = "res://world/base_level.tscn"
+metadata/_edit_lock_ = true
+
+[node name="player" parent="." instance=ExtResource("2_shbt8")]
+position = Vector2(736, 76)
+
+[node name="camera" type="Camera2D" parent="player"]
+position = Vector2(0, -6)
+limit_smoothed = true
+position_smoothing_enabled = true
+metadata/_edit_lock_ = true
+
+[node name="fade_layer" type="CanvasLayer" parent="."]
+script = ExtResource("4_52m43")
+transition_type = 5
+
+[node name="bg" type="Polygon2D" parent="."]
+z_index = -20
+polygon = PackedVector2Array(0, 0, 1280, 0, 1280, 180, 0, 180)

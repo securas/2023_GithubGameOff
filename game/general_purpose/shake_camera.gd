@@ -1,0 +1,2 @@
+extends Camera2D
+

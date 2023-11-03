@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://duen83hb32pal"]
+
+[ext_resource type="Script" path="res://entities/water/water.gd" id="1_m7cl3"]
+[ext_resource type="Texture2D" uid="uid://cqg5prudc76n8" path="res://assets/pixel.png" id="2_xquaf"]
+[ext_resource type="Material" uid="uid://d1hn8vksmfwmj" path="res://materials/water.material" id="3_7jq5v"]
+
+[node name="water" type="Node2D"]
+script = ExtResource("1_m7cl3")
+metadata/_edit_lock_ = true
+
+[node name="pixel" type="Sprite2D" parent="."]
+texture_repeat = 2
+material = ExtResource("3_7jq5v")
+texture = ExtResource("2_xquaf")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 128, 64)
+metadata/_edit_lock_ = true

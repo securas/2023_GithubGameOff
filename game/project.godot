@@ -22,11 +22,15 @@ game="*res://singletons/game.gd"
 
 [display]
 
-window/size/viewport_width=240
-window/size/viewport_height=135
+window/size/viewport_width=320
+window/size/viewport_height=180
 window/size/window_width_override=960
 window/size/window_height_override=540
 window/stretch/mode="viewport"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/ldtk2godot4/plugin.cfg")
 
 [input]
 

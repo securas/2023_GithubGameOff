@@ -1,0 +1,14 @@
+[remap]
+
+importer="LDtk2Godot4"
+type="Resource"
+uid="uid://cn81h12utjrgm"
+path="res://.godot/imported/level_0.ldtkl-2a6dc58a3384c32163ae4cfd833a111b.res"
+
+[deps]
+
+source_file="res://ldtk/maps/level_0.ldtkl"
+dest_files=["res://.godot/imported/level_0.ldtkl-2a6dc58a3384c32163ae4cfd833a111b.res"]
+
+[params]
+

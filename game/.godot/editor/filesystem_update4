@@ -1,3 +1,9 @@
+res://entities/player/player.tscn
+res://general_purpose/fade_layer.gdshader
+res://assets/main_tileset.tres
+res://materials/grass.gdshader
+res://materials/water.gdshader
+res://entities/player/player.gd
 res://screens/main.tscn
-res://singletons/game.gd
-res://singletons/sigmgr.gd
+res://world/world.tscn
+res://world/base_level.tscn
