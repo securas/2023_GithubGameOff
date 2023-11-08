@@ -22,8 +22,9 @@ var _player_state_lst : int = -1
 var _dir_cur : int = 1
 var _dir_nxt : int = 1
 var _anim_cur : String
-var _anim_nxt : String = "idle_nohat"
-var _has_hat : bool = false
+var _anim_nxt : String = "idle"
+var _has_hat : bool = false#true
+var _hat_jump : bool = false
 var _camera_offset : float = 0.0
 var _control_enabled : bool = true
 var _control : Dictionary = {
@@ -38,8 +39,30 @@ var _control : Dictionary = {
 @onready var _rotate : Node2D = $rotate
 @onready var _camera : Camera2D = $camera
 @onready var _anim : AnimationPlayer = $anim
+@onready var _hat : PlayerHat = $hat
 
 
+#--------------------------------------------------------------
+# hat functions
+#--------------------------------------------------------------
+func catch() -> void:
+	if _player_state_cur == PlayerStates.AIR:
+		_state_air_params.catch_timer = 0.2
+	else:
+		_state_floor_params.catch_timer = 0.2
+	_anim_nxt = "catch"
+
+func hat_jump() -> void:
+	_jump()
+	_hat_jump = true
+	#velocity.y *= 2.0
+	_init_state_air()
+	
+#--------------------------------------------------------------
+# standard functions
+#--------------------------------------------------------------
+#func _ready() -> void:
+	#game.player = self
 func _physics_process( delta : float ) -> void:
 	_update_control()
 	_fsm( delta )
@@ -47,14 +70,17 @@ func _physics_process( delta : float ) -> void:
 	_update_camera_position( delta )
 	_update_animation()
 
+
 func _entity_activate( a : bool ) -> void:
 	if a:
+		_anim.play()
 		set_physics_process( true )
 		_control_enabled = true
+		_has_hat = game.state.has_hat
 	else:
 		set_physics_process( false )
 		_control_enabled = false
-
+		_anim.stop( true )
 
 func _update_control() -> void:
 	_control.dir = Input.get_action_strength( "btn_right" ) - Input.get_action_strength( "btn_left" )
@@ -64,12 +90,16 @@ func _update_control() -> void:
 		_control.is_jump = Input.is_action_pressed( "btn_jump" )
 		_control.is_just_down = Input.is_action_just_pressed( "btn_down" )
 		_control.is_down = Input.is_action_pressed( "btn_down" )
+		_control.is_attack = Input.is_action_pressed( "btn_attack" )
+		_control.is_just_attack = Input.is_action_just_pressed( "btn_attack" )
 	else:
 		_control.is_moving = false
 		_control.is_just_jump = false
 		_control.is_jump = false
 		_control.is_just_down = false
 		_control.is_down = false
+		_control.is_attack = false
+		_control.is_just_attack = false
 
 func _update_direction() -> void:
 	if _dir_cur != _dir_nxt:
@@ -80,7 +110,7 @@ func _update_camera_position( delta : float ) -> void:
 	if not _camera: return
 	if _control.is_moving:
 		_camera_offset = lerp( _camera_offset, CAMERA_OFFSET * _dir_cur, delta * CAMERA_OFFSET_VEL )
-	_camera.position.x = _camera_offset
+	#_camera.position.x = _camera_offset
 
 func _update_animation() -> void:
 	if _anim_cur != _anim_nxt:
@@ -127,6 +157,8 @@ func _fsm( delta : float ) -> void:
 #--------------------------------------------------------------
 var _state_floor_params : Dictionary = {
 	drop_platform_timer = 0.0,
+	throw_timer = 0.0,
+	catch_timer = 0.0,
 }
 
 func _init_state_floor() -> void:
@@ -140,10 +172,28 @@ func _terminate_state_floor() -> void:
 	pass
 
 func _state_floor( delta : float ) -> void:
+	if _control.is_just_attack:
+		if _has_hat:
+			_hat.hat_throw()
+			_has_hat = false
+			_state_floor_params.throw_timer = 0.25
+			_anim_nxt = "throw"
+		else:
+			if game.state.has_hat:
+				_hat.hat_return()
+	if _state_floor_params.throw_timer > 0.0:
+		_state_floor_params.throw_timer -= delta
+		return
+	
+	if _state_floor_params.catch_timer > 0.0:
+		_state_floor_params.catch_timer -= delta
+		return
+	
 	if _control.is_just_jump:
 		_jump()
 		_player_state_nxt = PlayerStates.AIR
 		return
+	
 	if _control.is_moving:
 		_dir_nxt = sign( _control.dir )
 		velocity.x = FLOOR_VEL * _dir_nxt
@@ -152,6 +202,10 @@ func _state_floor( delta : float ) -> void:
 		velocity.x = 0
 		position = position.round()
 		_anim_nxt = "idle" + _hat_anim()
+	
+	
+	
+	
 	_gravity( delta )
 	var _collided = move_and_slide()
 	if not is_on_floor():
@@ -175,12 +229,16 @@ var _state_air_params : Dictionary = {
 	jump_buffer = 0.0,
 	coyote_timer = 0.0,
 	variable_jump_timer = 0.0,
+	throw_timer = 0.0,
+	catch_timer = 0.0,
 }
 
 func _init_state_air() -> void:
 	_state_air_params.jump_buffer = 0.0
 	_state_air_params.coyote_timer = COYOTE_MARGIN
 	_state_air_params.variable_jump_timer = VARIABLE_JUMP_MARGIN
+	_state_air_params.throw_timer = 0.0
+	_state_air_params.catch_timer = 0.0
 	if _state_air_params.is_jump:
 		_anim_nxt = "jump" + _hat_anim()
 	else:
@@ -188,6 +246,7 @@ func _init_state_air() -> void:
 
 func _terminate_state_air() -> void:
 	_state_air_params.is_jump = false
+	_hat_jump = false
 
 func _state_air( delta : float ) -> void:
 	# coyote timer
@@ -198,12 +257,44 @@ func _state_air( delta : float ) -> void:
 			_init_state_air()
 			return
 	# variable jump height
-	if _state_air_params.is_jump:
+	if _state_air_params.is_jump and not _hat_jump:
 		if _state_air_params.variable_jump_timer >= 0:
 			_state_air_params.variable_jump_timer -= delta
 			if not _control.is_jump or _state_air_params.variable_jump_timer < 0:
 				velocity.y *= 0.5
 				_state_air_params.variable_jump_timer = -1.0
+	
+	if _control.is_just_attack:
+		if _has_hat:
+			_hat.hat_throw()
+			_has_hat = false
+			_state_air_params.throw_timer = 0.25
+			_anim_nxt = "throw"
+		else:
+			if game.state.has_hat:
+				_hat.hat_return()
+	if _state_air_params.throw_timer > 0.0:
+		_state_air_params.throw_timer -= delta
+		if _control.is_just_jump:
+			_jump()
+			_init_state_air()
+			return
+		if _state_air_params.throw_timer <= 0:
+			if _state_air_params.is_jump:
+				_anim_nxt = "jump" + _hat_anim()
+			else:
+				_anim_nxt = "fall" + _hat_anim()
+		return
+	
+	if _state_air_params.catch_timer > 0.0:
+		_state_air_params.catch_timer -= delta
+		if _state_air_params.catch_timer <= 0:
+			if velocity.y < 0:
+				_anim_nxt = "jump" + _hat_anim()
+			else:
+				_anim_nxt = "fall" + _hat_anim()
+		return
+	
 	# control and motion
 	if _control.is_moving:
 		_dir_nxt = sign( _control.dir )
@@ -228,6 +319,10 @@ func _state_air( delta : float ) -> void:
 		_player_state_nxt = PlayerStates.FLOOR
 		$anim_fx.play( "land" )
 		$anim_fx.queue( "RESET" )
+
+
+
+
 
 #--------------------------------------------------------------
 # Useful methods - Could be moved to an Actor class

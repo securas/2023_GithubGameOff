@@ -1,0 +1,107 @@
+[gd_scene load_steps=11 format=3 uid="uid://s3uyqvbunwap"]
+
+[ext_resource type="Script" path="res://entities/slime/slime.gd" id="1_bjbtg"]
+[ext_resource type="Texture2D" uid="uid://c0ypouv7t7xqx" path="res://assets/slime.png" id="2_cnf3l"]
+[ext_resource type="Script" path="res://general_purpose/character_anim.gd" id="3_xd66t"]
+[ext_resource type="Script" path="res://general_purpose/deal_damage_area.gd" id="4_wihxb"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ld6pk"]
+size = Vector2(6, 5)
+
+[sub_resource type="Animation" id="Animation_hiqcc"]
+resource_name = "patrol"
+length = 0.6
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("rotate/slime:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [0, 1, 2]
+}
+
+[sub_resource type="Animation" id="Animation_6t3l5"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("rotate/slime:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_g84fk"]
+resource_name = "chase"
+length = 0.45
+loop_mode = 1
+step = 0.05
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("rotate/slime:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.15, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [0, 1, 2]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_q8cjd"]
+_data = {
+"RESET": SubResource("Animation_6t3l5"),
+"chase": SubResource("Animation_g84fk"),
+"patrol": SubResource("Animation_hiqcc")
+}
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0qwmk"]
+
+[node name="slime" type="CharacterBody2D"]
+script = ExtResource("1_bjbtg")
+metadata/_edit_lock_ = true
+
+[node name="collision" type="CollisionShape2D" parent="."]
+visible = false
+position = Vector2(0, -2.5)
+shape = SubResource("RectangleShape2D_ld6pk")
+metadata/_edit_lock_ = true
+
+[node name="rotate" type="Node2D" parent="."]
+metadata/_edit_lock_ = true
+
+[node name="slime" type="Sprite2D" parent="rotate"]
+position = Vector2(0, -8)
+texture = ExtResource("2_cnf3l")
+hframes = 4
+vframes = 2
+metadata/_edit_lock_ = true
+
+[node name="anim" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_q8cjd")
+}
+script = ExtResource("3_xd66t")
+
+[node name="DealDamageArea" type="Area2D" parent="."]
+visible = false
+collision_layer = 32
+collision_mask = 0
+script = ExtResource("4_wihxb")
+
+[node name="damage_collision_floor" type="CollisionShape2D" parent="DealDamageArea"]
+visible = false
+shape = SubResource("RectangleShape2D_0qwmk")
+
+[node name="damage_collision_air" type="CollisionShape2D" parent="DealDamageArea"]
+visible = false

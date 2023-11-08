@@ -7,7 +7,9 @@ signal player_leaving_level( player, player_world_position )
 
 @export var _map : LDtkMap = null : set = _set_map
 @export var _detect_player := true
+@export_flags_2d_physics var _area_collision_mask : int
 @export_flags_2d_physics var _player_detection_mask : int
+
 @export var _player_detection_grace_time : float
 
 var level_name : String
@@ -17,11 +19,9 @@ var entities : Array[Dictionary]
 var _debug := false
 var _level_limits_created := false
 
-var _detect_width := -4
-var _detect_margin := 4.0
-var _report_offset := 8.0
+var _detect_width := 8
+var _report_offset := 0.0
 var _update_ingame := false
-#var _detection_areas := {}
 var _detection_area : Area2D
 
 #----------------------------
@@ -89,13 +89,13 @@ func _create_level_limits() -> void:
 	var _ret : int
 	_detection_area = Area2D.new()
 	_detection_area.name = "_player_limits"
-	_detection_area.collision_layer = 0
+	_detection_area.collision_layer = _area_collision_mask
 	_detection_area.collision_mask = _player_detection_mask
-	#_detection_area.visible = false
+	_detection_area.visible = false
 	var _detection_area_shape = CollisionShape2D.new()
 	_detection_area_shape.shape = RectangleShape2D.new()
 	_detection_area_shape.shape.size = \
-		Vector2( rect.size ) + Vector2.ONE * _detect_width * 2
+		Vector2( rect.size ) - Vector2.ONE * _detect_width * 2
 	_detection_area_shape.position = rect.size * 0.5;
 	_detection_area.body_exited.connect( _on_player_exited_detection_area, CONNECT_DEFERRED )
 	add_child( _detection_area )
@@ -108,18 +108,22 @@ func _on_detect_start_time():
 
 func _on_player_exited_detection_area( player : Node2D ) -> void:
 	# find player position with respect to level
-	if player.global_position.x < 0:
+	if player.global_position.x < _detect_width:
+		if _debug: print( "LDtkLevel: player leaving left" )
 		_report_player_detected( player, rect.position + \
-			Vector2i( -_report_offset - _detect_margin, player.position.y ) )
-	elif player.global_position.x > rect.size.x:
+			Vector2i( -_report_offset - _detect_width, player.position.y ) )
+	elif player.global_position.x > rect.size.x - _detect_width:
+		if _debug: print( "LDtkLevel: player leaving right" )
 		_report_player_detected( player, rect.position + \
-			Vector2i( rect.size.x + _report_offset + _detect_margin, player.position.y ) )
-	elif player.global_position.y < 0:
+			Vector2i( rect.size.x + _detect_width + _report_offset, player.position.y ) )
+	elif player.global_position.y < _detect_width:
+		if _debug: print( "LDtkLevel: player leaving above" )
 		_report_player_detected( player, rect.position + \
-			Vector2i( player.position.x, -_report_offset - _detect_margin ) )
+			Vector2i( player.position.x, -_report_offset - _detect_width ) )
 	else:
+		if _debug: print( "LDtkLevel: player leaving bottom" )
 		_report_player_detected( player, rect.position + \
-			Vector2i( player.position.x, player.position.y + _report_offset + _detect_margin ) )
+			Vector2i( player.position.x, player.position.y + _report_offset + _detect_width ) )
 
 func _report_player_detected( player : Node2D, player_world_position : Vector2 ) -> void:
 	if not _detect_player: return

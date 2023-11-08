@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=3 uid="uid://dlnf8xrtvmtkb"]
+
+[ext_resource type="Script" path="res://entities/node2d_passive_entity.gd" id="1_soyrj"]
+[ext_resource type="Texture2D" uid="uid://c4e0igskqcqbe" path="res://assets/tileset.png" id="2_weyd0"]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_fvpbn"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 16.0
+direction = Vector3(-1, 0.25, 0)
+spread = 30.0
+initial_velocity_min = 10.0
+initial_velocity_max = 30.0
+gravity = Vector3(0, 0, 0)
+turbulence_enabled = true
+turbulence_noise_strength = 0.01
+
+[node name="tree_a" type="Node2D"]
+z_index = -5
+script = ExtResource("1_soyrj")
+
+[node name="tree" type="Sprite2D" parent="."]
+position = Vector2(0, -20)
+texture = ExtResource("2_weyd0")
+region_enabled = true
+region_rect = Rect2(184, 0, 48, 40)
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
+modulate = Color(0.901961, 0, 0, 1)
+position = Vector2(0, -24)
+amount = 80
+process_material = SubResource("ParticleProcessMaterial_fvpbn")
+lifetime = 60.0

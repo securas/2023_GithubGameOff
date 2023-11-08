@@ -23,10 +23,10 @@ script = ExtResource("1_kk35i")
 position = Vector2(0, -20)
 texture = ExtResource("1_kxjn8")
 region_enabled = true
-region_rect = Rect2(80, 0, 48, 40)
+region_rect = Rect2(136, 0, 48, 40)
 
 [node name="GPUParticles2D" type="GPUParticles2D" parent="."]
-modulate = Color(0.67451, 0.196078, 0.196078, 1)
+modulate = Color(0.901961, 0, 0, 1)
 position = Vector2(0, -24)
 amount = 80
 process_material = SubResource("ParticleProcessMaterial_fvpbn")

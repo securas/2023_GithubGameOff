@@ -59,7 +59,7 @@ func _load_level( level_name : String ) -> void:
 			var entity = _resload.reserve_entity( entity_data.id )
 			if not entity:
 				printerr( name, ": Unable to find entity in resource loader - ", entity_data.id )
-			entity.position = entity_data.position_px
+			entity.position = entity_data.position_px.round()
 			var aux_parameters = entity_data.parameters
 			aux_parameters.size = entity_data.size
 			entity._entity_initialize( aux_parameters )

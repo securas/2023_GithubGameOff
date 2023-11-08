@@ -1,0 +1,102 @@
+[gd_scene load_steps=9 format=3 uid="uid://bn5rln15yrbys"]
+
+[ext_resource type="Script" path="res://entities/house/house.gd" id="1_4jaqh"]
+[ext_resource type="Texture2D" uid="uid://c4e0igskqcqbe" path="res://assets/tileset.png" id="2_56fu7"]
+[ext_resource type="Texture2D" uid="uid://d3sqvl2go4iww" path="res://assets/grand.png" id="3_tvbq5"]
+
+[sub_resource type="Animation" id="Animation_6dsl5"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_2tcgt"]
+resource_name = "backward"
+length = 0.6
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [3, 4]
+}
+
+[sub_resource type="Animation" id="Animation_rqvlt"]
+resource_name = "forward"
+length = 3.0
+loop_mode = 1
+step = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 0, 1, 0, 1, 0, 1, 2, 1]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_o10a7"]
+_data = {
+"RESET": SubResource("Animation_6dsl5"),
+"backward": SubResource("Animation_2tcgt"),
+"forward": SubResource("Animation_rqvlt")
+}
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_b42g8"]
+size = Vector2(3, 73)
+
+[node name="house" type="Node2D"]
+z_index = -5
+script = ExtResource("1_4jaqh")
+metadata/_edit_lock_ = true
+
+[node name="house" type="Sprite2D" parent="."]
+position = Vector2(0, -24)
+texture = ExtResource("2_56fu7")
+region_enabled = true
+region_rect = Rect2(216, 80, 40, 48)
+
+[node name="grand" type="Sprite2D" parent="."]
+position = Vector2(20, 0)
+texture = ExtResource("3_tvbq5")
+offset = Vector2(0, -7)
+hframes = 2
+vframes = 3
+metadata/_edit_lock_ = true
+
+[node name="anim" type="AnimationPlayer" parent="grand"]
+libraries = {
+"": SubResource("AnimationLibrary_o10a7")
+}
+
+[node name="detect_player" type="Area2D" parent="."]
+position = Vector2(37, -9)
+collision_layer = 0
+collision_mask = 16
+metadata/_edit_lock_ = true
+
+[node name="player_collision" type="CollisionShape2D" parent="detect_player"]
+position = Vector2(-8.5, -27.5)
+shape = SubResource("RectangleShape2D_b42g8")
+metadata/_edit_lock_ = true
+
+[connection signal="body_entered" from="detect_player" to="." method="_on_detect_player_body_entered" flags=3]

@@ -89,6 +89,7 @@ btn_jump={
 2d_physics/layer_7="player death"
 2d_physics/layer_10="enemy"
 2d_physics/layer_11="enemy hitbox"
+2d_physics/layer_15="level detection"
 
 [rendering]
 

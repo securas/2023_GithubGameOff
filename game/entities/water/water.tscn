@@ -5,6 +5,7 @@
 [ext_resource type="Material" uid="uid://d1hn8vksmfwmj" path="res://materials/water.material" id="3_7jq5v"]
 
 [node name="water" type="Node2D"]
+z_index = 20
 script = ExtResource("1_m7cl3")
 metadata/_edit_lock_ = true
 

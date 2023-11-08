@@ -16,7 +16,8 @@ void fragment()
 	//vec2 flipped_screen_uv = vec2( SCREEN_UV.x, 
 		//SCREEN_UV.y + 2.0 * UV.y * tex_to_screen_uv_ratio.y );
 	vec2 suv = vec2( SCREEN_UV.x, SCREEN_UV.y + 2.0 * UV.y * tex_to_screen_uv_ratio.y );
-	suv.x += 0.125 * SCREEN_PIXEL_SIZE.x * sin( 100.0 * UV.y  + speed * TIME ) * UV.y;
+	//suv.x += 0.5 * 0.125 * SCREEN_PIXEL_SIZE.x * sin( 100.0 * UV.y  + speed * TIME ) * UV.y;
+	suv.x += 0.0025 * 0.125 * sin( 100.0 * UV.y  + speed * TIME ) * UV.y;
 	
 	suv = floor( suv / SCREEN_PIXEL_SIZE ) * SCREEN_PIXEL_SIZE;
 	suv += SCREEN_PIXEL_SIZE * 0.5;

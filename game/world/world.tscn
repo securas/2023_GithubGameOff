@@ -1,9 +1,22 @@
-[gd_scene load_steps=5 format=3 uid="uid://c41ggaf16ri4n"]
+[gd_scene load_steps=14 format=3 uid="uid://c41ggaf16ri4n"]
 
 [ext_resource type="Script" path="res://world/world.gd" id="1_hr5od"]
 [ext_resource type="Resource" uid="uid://bgkl35ygbxdvg" path="res://ldtk/maps.ldtk" id="2_8hbjv"]
 [ext_resource type="PackedScene" uid="uid://c60g4o60txj2n" path="res://entities/player/player.tscn" id="2_shbt8"]
+[ext_resource type="Script" path="res://general_purpose/shake_camera.gd" id="4_2n1g3"]
 [ext_resource type="Script" path="res://general_purpose/fade_layer.gd" id="4_52m43"]
+[ext_resource type="Texture2D" uid="uid://d3bytn5ibcyk2" path="res://assets/mountain_background_front.png" id="5_eujj5"]
+[ext_resource type="Texture2D" uid="uid://bjtiphglb3x2o" path="res://icon.svg" id="6_sfrql"]
+[ext_resource type="Shader" path="res://materials/fog.gdshader" id="6_wfjvk"]
+[ext_resource type="Texture2D" uid="uid://cqg5prudc76n8" path="res://assets/pixel.png" id="7_4vxab"]
+[ext_resource type="Texture2D" uid="uid://c286ihpjmf58j" path="res://assets/mountain_background_middle.png" id="7_k7nik"]
+[ext_resource type="Script" path="res://world/map_images.gd" id="11_jdtwq"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_3caqa"]
+shader = ExtResource("6_wfjvk")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_uqoo8"]
+shader = ExtResource("6_wfjvk")
 
 [node name="world" type="Node2D"]
 script = ExtResource("1_hr5od")
@@ -11,19 +24,83 @@ map = ExtResource("2_8hbjv")
 base_level_scene = "res://world/base_level.tscn"
 metadata/_edit_lock_ = true
 
+[node name="map_images" type="Node2D" parent="."]
+script = ExtResource("11_jdtwq")
+map = ExtResource("2_8hbjv")
+metadata/_edit_lock_ = true
+
 [node name="player" parent="." instance=ExtResource("2_shbt8")]
-position = Vector2(736, 76)
+position = Vector2(1080, 116)
 
 [node name="camera" type="Camera2D" parent="player"]
 position = Vector2(0, -6)
-limit_smoothed = true
-position_smoothing_enabled = true
+position_smoothing_speed = 3.0
+script = ExtResource("4_2n1g3")
 metadata/_edit_lock_ = true
 
 [node name="fade_layer" type="CanvasLayer" parent="."]
 script = ExtResource("4_52m43")
 transition_type = 5
 
-[node name="bg" type="Polygon2D" parent="."]
+[node name="CanvasLayer" type="ParallaxBackground" parent="."]
+
+[node name="bg" type="Polygon2D" parent="CanvasLayer"]
 z_index = -20
 polygon = PackedVector2Array(0, 0, 1280, 0, 1280, 180, 0, 180)
+metadata/_edit_lock_ = true
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer"]
+visible = false
+material = SubResource("ShaderMaterial_3caqa")
+offset_top = 28.0
+offset_right = 328.0
+offset_bottom = 152.0
+texture = ExtResource("6_sfrql")
+expand_mode = 1
+stretch_mode = 1
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+
+[node name="middle" type="ParallaxLayer" parent="ParallaxBackground"]
+visible = false
+motion_scale = Vector2(0.02, 0.02)
+motion_mirroring = Vector2(320, 0)
+
+[node name="MountainBackgroundMiddle" type="Sprite2D" parent="ParallaxBackground/middle"]
+texture = ExtResource("7_k7nik")
+centered = false
+
+[node name="fog" type="Sprite2D" parent="ParallaxBackground/middle/MountainBackgroundMiddle"]
+material = SubResource("ShaderMaterial_uqoo8")
+position = Vector2(160, 88)
+scale = Vector2(320, 102)
+texture = ExtResource("7_4vxab")
+
+[node name="pixel" type="Sprite2D" parent="ParallaxBackground/middle/MountainBackgroundMiddle"]
+position = Vector2(0, 136)
+scale = Vector2(320, 180)
+texture = ExtResource("7_4vxab")
+centered = false
+
+[node name="front" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0.05, 0)
+motion_mirroring = Vector2(320, 0)
+
+[node name="MountainBackgroundFront" type="Sprite2D" parent="ParallaxBackground/front"]
+self_modulate = Color(0.729412, 0.729412, 0.729412, 1)
+position = Vector2(0, -28)
+texture = ExtResource("5_eujj5")
+centered = false
+metadata/_edit_lock_ = true
+
+[node name="pixel2" type="Sprite2D" parent="ParallaxBackground/front/MountainBackgroundFront"]
+position = Vector2(0, 168)
+scale = Vector2(320, 180)
+texture = ExtResource("7_4vxab")
+centered = false
+
+[node name="fog" type="Sprite2D" parent="ParallaxBackground/front/MountainBackgroundFront"]
+material = SubResource("ShaderMaterial_uqoo8")
+position = Vector2(160, 132)
+scale = Vector2(320, 76)
+texture = ExtResource("7_4vxab")

@@ -8,7 +8,7 @@ void fragment()
 	
 	float frame = floor( fract( TIME * fps / frame_count ) * frame_count );
 	vec2 uv = UV;// + vec2( frame * cell_size, 0.0 ) * TEXTURE_PIXEL_SIZE;
-	if( uv.y < 9.0 * cell_size * TEXTURE_PIXEL_SIZE.y )
+	if( uv.y >= 3.0 * cell_size * TEXTURE_PIXEL_SIZE.y && uv.y < 9.0 * cell_size * TEXTURE_PIXEL_SIZE.y )
 		uv.x += frame * cell_size * TEXTURE_PIXEL_SIZE.x;
 	COLOR = texture( TEXTURE, uv );
 }
