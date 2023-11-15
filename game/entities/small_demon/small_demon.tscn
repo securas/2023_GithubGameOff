@@ -1,0 +1,165 @@
+[gd_scene load_steps=17 format=3 uid="uid://crsxduvqkpvbh"]
+
+[ext_resource type="Script" path="res://entities/small_demon/small_demon.gd" id="1_vxeca"]
+[ext_resource type="Texture2D" uid="uid://cmpf66wim2pjj" path="res://assets/small_demon.png" id="2_ejobp"]
+[ext_resource type="Script" path="res://general_purpose/flash_sprite.gd" id="3_eq15j"]
+[ext_resource type="Script" path="res://general_purpose/character_anim.gd" id="4_staun"]
+[ext_resource type="Script" path="res://general_purpose/deal_damage_area.gd" id="5_4xbrh"]
+[ext_resource type="Script" path="res://general_purpose/receive_damage_area.gd" id="6_k7wfd"]
+[ext_resource type="PackedScene" uid="uid://k27t3r2l8jyl" path="res://entities/vfx/medium_explosion.tscn" id="7_70si7"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qsmxj"]
+size = Vector2(6, 12)
+
+[sub_resource type="Animation" id="Animation_6t3l5"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("rotate/demon:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_g84fk"]
+resource_name = "chase"
+length = 0.56
+loop_mode = 1
+step = 0.07
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("rotate/demon:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.07, 0.14, 0.21, 0.28, 0.35, 0.42, 0.49),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [8, 9, 10, 11, 12, 13, 14, 15]
+}
+
+[sub_resource type="Animation" id="Animation_hiqcc"]
+resource_name = "patrol"
+length = 0.8
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("rotate/demon:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6, 7]
+}
+
+[sub_resource type="Animation" id="Animation_xj2he"]
+resource_name = "prepare_attack"
+length = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("rotate/demon:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [3]
+}
+
+[sub_resource type="Animation" id="Animation_pwjpr"]
+resource_name = "wait"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("rotate/demon:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [0, 6]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_q8cjd"]
+_data = {
+"RESET": SubResource("Animation_6t3l5"),
+"chase": SubResource("Animation_g84fk"),
+"patrol": SubResource("Animation_hiqcc"),
+"prepare_attack": SubResource("Animation_xj2he"),
+"wait": SubResource("Animation_pwjpr")
+}
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_s4836"]
+size = Vector2(4, 10)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_deree"]
+size = Vector2(8, 12)
+
+[node name="small_demon" type="CharacterBody2D"]
+collision_layer = 512
+script = ExtResource("1_vxeca")
+metadata/_edit_lock_ = true
+
+[node name="collision" type="CollisionShape2D" parent="."]
+visible = false
+position = Vector2(0, -6)
+shape = SubResource("RectangleShape2D_qsmxj")
+metadata/_edit_lock_ = true
+
+[node name="rotate" type="Node2D" parent="."]
+metadata/_edit_lock_ = true
+
+[node name="demon" type="Sprite2D" parent="rotate"]
+texture = ExtResource("2_ejobp")
+offset = Vector2(0, -8)
+hframes = 8
+vframes = 2
+script = ExtResource("3_eq15j")
+metadata/_edit_lock_ = true
+
+[node name="anim" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_q8cjd")
+}
+script = ExtResource("4_staun")
+
+[node name="DealDamageArea" type="Area2D" parent="."]
+collision_layer = 32
+collision_mask = 0
+script = ExtResource("5_4xbrh")
+metadata/_edit_lock_ = true
+
+[node name="damage_collision" type="CollisionShape2D" parent="DealDamageArea"]
+visible = false
+position = Vector2(0, -6)
+shape = SubResource("RectangleShape2D_s4836")
+metadata/_edit_lock_ = true
+
+[node name="RcvDamageArea" type="Area2D" parent="."]
+visible = false
+collision_layer = 0
+collision_mask = 1024
+script = ExtResource("6_k7wfd")
+metadata/_edit_lock_ = true
+
+[node name="rcv_damage_collision" type="CollisionShape2D" parent="RcvDamageArea"]
+position = Vector2(0, -6)
+shape = SubResource("RectangleShape2D_deree")
+metadata/_edit_lock_ = true
+
+[node name="medium_explosion" parent="." instance=ExtResource("7_70si7")]
+visible = false
+position = Vector2(0, -6)

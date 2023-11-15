@@ -52,6 +52,7 @@ func _init_state_hidden() -> void:
 	$hat_collision.disabled = true
 	$detect_player/player_collision.disabled = true
 	$player_jump/jump_collision.disabled = true
+	$DealDamageArea/damage_collision.disabled = true
 	_jump_enable_timer = 0.2
 
 var _throw_properties = {
@@ -65,6 +66,7 @@ func _init_state_throw() -> void:
 	show()
 	$hat_collision.disabled = false
 	$detect_player/player_collision.disabled = true
+	$DealDamageArea/damage_collision.disabled = false
 	_throw_properties.travel_time = game.state.hat_travel_time
 	_hat.scale.x = sign( velocity.x )
 
@@ -96,6 +98,7 @@ func _init_state_hit() -> void:
 	_hit_timer = 5.0
 	velocity *= 0
 	$player_jump/jump_collision.disabled = false
+	$DealDamageArea/damage_collision.disabled = true
 func _state_hit( delta : float ) -> void:
 	_hit_timer -= delta
 	if _hit_timer <= 0:
@@ -107,6 +110,7 @@ func _init_state_return() -> void:
 	_hat_state = HatStates.RETURN
 	$hat_collision.disabled = true
 	$detect_player/player_collision.disabled = false
+	$DealDamageArea/damage_collision.disabled = false
 
 func _state_return( delta : float ) -> void:
 	var dist = _player.global_position - global_position + Vector2( 0, -6 )

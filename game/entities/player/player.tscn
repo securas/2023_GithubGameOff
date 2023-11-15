@@ -1,8 +1,10 @@
-[gd_scene load_steps=21 format=3 uid="uid://c60g4o60txj2n"]
+[gd_scene load_steps=24 format=3 uid="uid://c60g4o60txj2n"]
 
 [ext_resource type="Texture2D" uid="uid://ddb343vypdbc8" path="res://assets/player.png" id="1_0rcu8"]
 [ext_resource type="Script" path="res://entities/player/player.gd" id="1_2j3e6"]
 [ext_resource type="PackedScene" uid="uid://brbgvwwdypmrv" path="res://entities/player/hat.tscn" id="3_hkxws"]
+[ext_resource type="Script" path="res://general_purpose/flash_sprite.gd" id="4_d64fa"]
+[ext_resource type="Script" path="res://general_purpose/receive_damage_area.gd" id="4_u7nu4"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_y7rjw"]
 size = Vector2(6, 12)
@@ -264,6 +266,9 @@ _data = {
 "throw": SubResource("Animation_6eede")
 }
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_t7h5t"]
+size = Vector2(3, 10)
+
 [node name="player" type="CharacterBody2D"]
 collision_layer = 16
 floor_constant_speed = true
@@ -284,6 +289,7 @@ offset = Vector2(0, -7)
 hframes = 8
 vframes = 8
 frame = 4
+script = ExtResource("4_d64fa")
 metadata/_edit_lock_ = true
 
 [node name="anim_fx" type="AnimationPlayer" parent="."]
@@ -298,3 +304,24 @@ libraries = {
 
 [node name="hat" parent="." instance=ExtResource("3_hkxws")]
 visible = false
+
+[node name="RcvDamageArea" type="Area2D" parent="."]
+visible = false
+collision_layer = 0
+collision_mask = 32
+script = ExtResource("4_u7nu4")
+metadata/_edit_lock_ = true
+
+[node name="damage_collision" type="CollisionShape2D" parent="RcvDamageArea"]
+position = Vector2(0.5, -5.5)
+shape = SubResource("RectangleShape2D_t7h5t")
+metadata/_edit_lock_ = true
+
+[node name="detect_hazards" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 128
+
+[node name="hazards_collision" type="CollisionShape2D" parent="detect_hazards"]
+position = Vector2(0.5, -5)
+shape = SubResource("RectangleShape2D_t7h5t")
+metadata/_edit_lock_ = true

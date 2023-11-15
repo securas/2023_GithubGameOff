@@ -30,7 +30,7 @@ map = ExtResource("2_8hbjv")
 metadata/_edit_lock_ = true
 
 [node name="player" parent="." instance=ExtResource("2_shbt8")]
-position = Vector2(1080, 116)
+position = Vector2(1804, 132)
 
 [node name="camera" type="Camera2D" parent="player"]
 position = Vector2(0, -6)

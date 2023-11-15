@@ -108,6 +108,7 @@ func _generate_ldtk_levels() -> void:
 			new_entity.hide()
 			new_entity.position = _hidden_entity_position
 			_parent.add_child( new_entity )
+			new_entity._entity_activate( false )
 			entities.append( new_entity )
 			new_entity.owner = _parent
 			var new_entity_data = {

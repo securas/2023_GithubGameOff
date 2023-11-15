@@ -1,7 +1,8 @@
-[gd_scene load_steps=13 format=3 uid="uid://brbgvwwdypmrv"]
+[gd_scene load_steps=15 format=3 uid="uid://brbgvwwdypmrv"]
 
 [ext_resource type="Texture2D" uid="uid://ddb343vypdbc8" path="res://assets/player.png" id="1_hu0wf"]
 [ext_resource type="Script" path="res://entities/player/hat.gd" id="1_tijvf"]
+[ext_resource type="Script" path="res://general_purpose/deal_damage_area.gd" id="3_bbo1w"]
 
 [sub_resource type="Animation" id="Animation_twrpx"]
 length = 0.001
@@ -102,10 +103,8 @@ size = Vector2(4, 4)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xyd2q"]
 size = Vector2(6, 1)
 
-[sub_resource type="Animation" id="Animation_oty6o"]
-resource_name = "default"
-length = 0.1
-loop_mode = 2
+[sub_resource type="Animation" id="Animation_hgnxp"]
+length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -143,8 +142,10 @@ tracks/2/keys = {
 "values": [Vector2(1, 1)]
 }
 
-[sub_resource type="Animation" id="Animation_hgnxp"]
-length = 0.001
+[sub_resource type="Animation" id="Animation_oty6o"]
+resource_name = "default"
+length = 0.1
+loop_mode = 2
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -228,6 +229,9 @@ _data = {
 "jump": SubResource("Animation_8mg4l")
 }
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_oo73p"]
+size = Vector2(12, 5)
+
 [node name="hat" type="CharacterBody2D"]
 collision_layer = 0
 script = ExtResource("1_tijvf")
@@ -277,6 +281,20 @@ metadata/_edit_lock_ = true
 libraries = {
 "": SubResource("AnimationLibrary_egesp")
 }
+
+[node name="DealDamageArea" type="Area2D" parent="."]
+visible = false
+collision_layer = 1024
+collision_mask = 0
+script = ExtResource("3_bbo1w")
+metadata/_edit_lock_ = true
+
+[node name="damage_collision" type="CollisionShape2D" parent="DealDamageArea"]
+visible = false
+position = Vector2(0, 0.5)
+shape = SubResource("RectangleShape2D_oo73p")
+disabled = true
+metadata/_edit_lock_ = true
 
 [connection signal="body_entered" from="detect_player" to="." method="_on_detect_player_body_entered" flags=3]
 [connection signal="body_entered" from="player_jump" to="." method="_on_player_jump_body_entered"]

@@ -1,5 +1,7 @@
 extends LDtkWorld
 
+@export var world_debug : bool = true
+
 @onready var camera : Camera2D = $player/camera
 @onready var player : Player = $player
 
@@ -8,12 +10,14 @@ func _ready() -> void:
 		return
 	$fade_layer.fade_out( true )
 	super._ready()
+	$player.player_dead.connect( _on_player_dead )
 	world_ready.connect( _on_world_ready )
 	#level_ready.connect( _on_level_ready )
 
 func _on_world_ready() -> void:
-	var starting_level = map.get_level_name_at( game.state.worldpos_px )#
-	starting_level = map.get_level_name_at( $player.global_position )
+	if world_debug:
+		game.state.worldpos_px = $player.global_position
+	var starting_level = map.get_level_name_at( game.state.worldpos_px )
 	if starting_level:
 		player._entity_activate( false )
 		_load_level( starting_level )
@@ -35,8 +39,7 @@ func _on_world_ready() -> void:
 		$fade_layer.fade_in()
 
 
-
-func _on_player_leaving_level( player : Node2D, player_world_position : Vector2 ) -> void:
+func _on_player_leaving_level( _player : Node2D, player_world_position : Vector2 ) -> void:
 	var new_level_name = map.get_level_name_at( player_world_position )
 	if _debug: print( "New level: ", new_level_name, " at ", player_world_position )
 	if not new_level_name:
@@ -59,3 +62,10 @@ func _on_player_leaving_level( player : Node2D, player_world_position : Vector2 
 	$fade_layer.fade_in()
 	await $fade_layer.fade_complete
 	player._entity_activate( true )
+
+
+
+func _on_player_dead() -> void:
+	game.reset_state()
+	_on_player_leaving_level( $player, game.state.worldpos_px )
+	pass

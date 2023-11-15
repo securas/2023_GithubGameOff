@@ -13,7 +13,7 @@ func _enter_tree() -> void:
 		print( map.resource_path )
 		var pos = map.resource_path.find( ".ldtk" )
 		var png_path = map.resource_path.substr( 0, pos ) + "/png"
-		var levels = map.world_data.keys()
+		var _levels = map.world_data.keys()
 		for level_name in map.world_data.keys():
 			var png_filename = "%s/%s.png" % [ png_path, level_name ]
 			var texture = load( png_filename )

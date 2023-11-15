@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://b6nd3r84gukew"]
+
+[ext_resource type="Script" path="res://entities/node2d_passive_entity.gd" id="1_x1rf5"]
+[ext_resource type="Texture2D" uid="uid://c4e0igskqcqbe" path="res://assets/tileset.png" id="2_118rr"]
+
+[node name="house" type="Node2D"]
+z_index = -5
+script = ExtResource("1_x1rf5")
+metadata/_edit_lock_ = true
+
+[node name="house" type="Sprite2D" parent="."]
+position = Vector2(0, -24)
+texture = ExtResource("2_118rr")
+region_enabled = true
+region_rect = Rect2(216, 80, 40, 48)
+metadata/_edit_lock_ = true

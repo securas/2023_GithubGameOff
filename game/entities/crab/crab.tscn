@@ -1,0 +1,114 @@
+[gd_scene load_steps=14 format=3 uid="uid://c6w3vhgntwoth"]
+
+[ext_resource type="Script" path="res://entities/crab/crab.gd" id="1_uoj3n"]
+[ext_resource type="Texture2D" uid="uid://bk075kfy83pkf" path="res://assets/crab.png" id="2_gvuot"]
+[ext_resource type="Script" path="res://general_purpose/flash_sprite.gd" id="3_i11pd"]
+[ext_resource type="Script" path="res://general_purpose/character_anim.gd" id="4_nwx1s"]
+[ext_resource type="Script" path="res://general_purpose/deal_damage_area.gd" id="5_dno3u"]
+[ext_resource type="Script" path="res://general_purpose/receive_damage_area.gd" id="6_87em7"]
+[ext_resource type="PackedScene" uid="uid://k27t3r2l8jyl" path="res://entities/vfx/medium_explosion.tscn" id="7_nd3l8"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_icjpg"]
+size = Vector2(8, 8)
+
+[sub_resource type="Animation" id="Animation_6t3l5"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("rotate/crab:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_hiqcc"]
+resource_name = "patrol"
+length = 0.8
+loop_mode = 1
+step = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("rotate/crab:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.4, 0.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_q8cjd"]
+_data = {
+"RESET": SubResource("Animation_6t3l5"),
+"patrol": SubResource("Animation_hiqcc")
+}
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3w4jn"]
+size = Vector2(6, 6)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fbwhn"]
+size = Vector2(8, 8)
+
+[node name="crab" type="CharacterBody2D"]
+collision_layer = 512
+script = ExtResource("1_uoj3n")
+metadata/_edit_lock_ = true
+
+[node name="unused_collision" type="CollisionShape2D" parent="."]
+visible = false
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_icjpg")
+disabled = true
+metadata/_edit_lock_ = true
+
+[node name="rotate" type="Node2D" parent="."]
+position = Vector2(0, -4)
+rotation = -6.28318
+metadata/_edit_lock_ = true
+
+[node name="crab" type="Sprite2D" parent="rotate"]
+position = Vector2(0, 4)
+texture = ExtResource("2_gvuot")
+offset = Vector2(0, -8)
+hframes = 4
+script = ExtResource("3_i11pd")
+metadata/_edit_lock_ = true
+
+[node name="anim" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_q8cjd")
+}
+script = ExtResource("4_nwx1s")
+
+[node name="DealDamageArea" type="Area2D" parent="."]
+collision_layer = 32
+collision_mask = 0
+script = ExtResource("5_dno3u")
+metadata/_edit_lock_ = true
+
+[node name="damage_collision" type="CollisionShape2D" parent="DealDamageArea"]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_3w4jn")
+metadata/_edit_lock_ = true
+
+[node name="RcvDamageArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1024
+script = ExtResource("6_87em7")
+metadata/_edit_lock_ = true
+
+[node name="rcv_damage_collision" type="CollisionShape2D" parent="RcvDamageArea"]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_fbwhn")
+metadata/_edit_lock_ = true
+
+[node name="medium_explosion" parent="." instance=ExtResource("7_nd3l8")]
+visible = false
+position = Vector2(0, -4)

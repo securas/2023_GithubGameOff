@@ -4,7 +4,6 @@ var anim_nxt := "forward"
 var anim_cur = ""
 
 func _entity_activate( a : bool ) -> void:
-	print( "Activating House: ", a )
 	set_physics_process( a )
 	$detect_player/player_collision.disabled = game.is_event( "received hat" )
 	

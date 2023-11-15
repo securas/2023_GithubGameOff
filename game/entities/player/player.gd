@@ -1,5 +1,7 @@
 class_name Player extends CharacterBody2D
 
+signal player_dead
+
 const GRAVITY = 900
 const TERM_VEL = 200#350
 const JUMP_VEL = 280#380
@@ -11,10 +13,13 @@ const DROP_PLATFORM_MARGIN = 0.1
 const AIR_VEL = 70#80
 const AIR_ACCEL = 10
 const AIR_DECEL = 5
+const HIT_TIMEOUT = 0.05
+const HIT_THROWBACK_VEL = 100
+const INVULNERABLE_TIMEOUT = 0.3
 const CAMERA_OFFSET = 24.0
 const CAMERA_OFFSET_VEL = 1.0
 
-enum PlayerStates { FLOOR, AIR }
+enum PlayerStates { FLOOR, AIR, HIT, DEAD }
 
 var _player_state_cur : int = -1
 var _player_state_nxt : int = PlayerStates.AIR
@@ -25,6 +30,10 @@ var _anim_cur : String
 var _anim_nxt : String = "idle"
 var _has_hat : bool = false#true
 var _hat_jump : bool = false
+var _is_hit : bool = false
+var _is_invulnerable : bool = false
+#var _is_dead : bool = false
+var _invulnerable_timer : float = 0.0
 var _camera_offset : float = 0.0
 var _control_enabled : bool = true
 var _control : Dictionary = {
@@ -40,7 +49,7 @@ var _control : Dictionary = {
 @onready var _camera : Camera2D = $camera
 @onready var _anim : AnimationPlayer = $anim
 @onready var _hat : PlayerHat = $hat
-
+@onready var _detect_hazards : Area2D = $detect_hazards
 
 #--------------------------------------------------------------
 # hat functions
@@ -61,14 +70,23 @@ func hat_jump() -> void:
 #--------------------------------------------------------------
 # standard functions
 #--------------------------------------------------------------
-#func _ready() -> void:
-	#game.player = self
+func _ready() -> void:
+	game.player = self
+	_has_hat = game.state.has_hat
+
 func _physics_process( delta : float ) -> void:
 	_update_control()
 	_fsm( delta )
 	_update_direction()
 	_update_camera_position( delta )
 	_update_animation()
+	_check_hazards()
+	
+	if _is_invulnerable:
+		_invulnerable_timer -= delta
+		if _invulnerable_timer <= 0:
+			_is_invulnerable = false
+			$rotate/player.stop()
 
 
 func _entity_activate( a : bool ) -> void:
@@ -76,7 +94,6 @@ func _entity_activate( a : bool ) -> void:
 		_anim.play()
 		set_physics_process( true )
 		_control_enabled = true
-		_has_hat = game.state.has_hat
 	else:
 		set_physics_process( false )
 		_control_enabled = false
@@ -136,18 +153,30 @@ func _fsm( delta : float ) -> void:
 				_terminate_state_floor()
 			PlayerStates.AIR:
 				_terminate_state_air()
+			PlayerStates.HIT:
+				_terminate_state_hit()
+			PlayerStates.DEAD:
+				_terminate_state_dead()
 		# Initialize new state
 		match _player_state_cur:
 			PlayerStates.FLOOR:
 				_init_state_floor()
 			PlayerStates.AIR:
 				_init_state_air()
+			PlayerStates.HIT:
+				_init_state_hit()
+			PlayerStates.DEAD:
+				_init_state_dead()
 	# Run state
 	match _player_state_cur:
 		PlayerStates.FLOOR:
 			_state_floor( delta )
 		PlayerStates.AIR:
 			_state_air( delta )
+		PlayerStates.HIT:
+			_state_hit( delta )
+		PlayerStates.DEAD:
+			_state_dead( delta )
 
 
 
@@ -321,7 +350,101 @@ func _state_air( delta : float ) -> void:
 		$anim_fx.queue( "RESET" )
 
 
+#--------------------------------------------------------------
+# State Hit
+#--------------------------------------------------------------
+var _state_hit_params : Dictionary = {
+	hit_timer = HIT_TIMEOUT,
+	hit_dir = Vector2.ZERO
+}
+func _init_state_hit() -> void:
+	_state_hit_params.hit_timer = HIT_TIMEOUT
+	$rotate/player.flash(0.3)
+	velocity = _state_hit_params.hit_dir
 
+func _terminate_state_hit() -> void:
+	_is_hit = false
+
+func _state_hit( delta : float ) -> void:
+	var _hit = move_and_slide()
+	_state_hit_params.hit_timer -= delta
+	if _state_hit_params.hit_timer <= 0:
+		_player_state_nxt = PlayerStates.AIR
+
+
+
+
+#--------------------------------------------------------------
+# State Dead
+#--------------------------------------------------------------
+var _state_dead_params : Dictionary = {
+	dead_timer = 2.0,
+}
+func _init_state_dead() -> void:
+	_state_dead_params.dead_timer = 2.0
+
+func _terminate_state_dead() -> void:
+	_is_hit = false
+
+func _state_dead( delta : float ) -> void:
+	if _state_dead_params.dead_timer > 0:
+		_state_dead_params.dead_timer -= delta
+		if _state_dead_params.dead_timer <= 0:
+			player_dead.emit()
+			_player_state_nxt = PlayerStates.AIR
+
+
+
+
+
+
+#--------------------------------------------------------------
+# Damage
+#--------------------------------------------------------------
+func _on_receiving_damage( from : Node, damage : int ) -> void:
+	if _is_hit or _is_invulnerable: return
+	_is_hit = true
+	
+	var nxt_energy = game.state.energy - damage # this is to avoid triggering hud
+	nxt_energy = nxt_energy if nxt_energy >= 0 else 0
+	game.state.energy = nxt_energy # now its ok to trigger the hub
+	if game.state.energy == 0:
+		# dead
+		_player_state_nxt = PlayerStates.DEAD
+		_is_invulnerable = false
+		sigmgr.camera_shake.emit( 0.3, 2, 60 )
+	else:
+		# still alive
+		sigmgr.camera_shake.emit( 0.2, 2, 60 )
+		_player_state_nxt = PlayerStates.HIT
+		_is_invulnerable = true
+		_invulnerable_timer = INVULNERABLE_TIMEOUT
+		if velocity.length() > 5:
+			_state_hit_params.hit_dir = -velocity.normalized() * HIT_THROWBACK_VEL
+		else:
+			_state_hit_params.hit_dir = ( global_position - from.global_position ).normalized() * HIT_THROWBACK_VEL
+
+func _check_hazards() -> void:
+	if _is_hit or _is_invulnerable: return
+	var hazards = _detect_hazards.get_overlapping_bodies()
+	hazards.append_array( _detect_hazards.get_overlapping_areas() )
+	if not hazards: return
+	_is_hit = true
+	var nxt_energy = game.state.energy - 1 # this is to avoid triggering hud
+	nxt_energy = nxt_energy if nxt_energy >= 0 else 0
+	game.state.energy = nxt_energy
+	if game.state.energy == 0:
+		# dead
+		_player_state_nxt = PlayerStates.DEAD
+		_is_invulnerable = false
+		sigmgr.camera_shake.emit( 0.3, 2, 60 )
+	else:
+		# still alive
+		_player_state_nxt = PlayerStates.HIT
+		_is_invulnerable = true
+		_invulnerable_timer = INVULNERABLE_TIMEOUT
+		_state_hit_params.hit_dir = Vector2( 0, -HIT_THROWBACK_VEL * 2 )
+		sigmgr.camera_shake.emit( 0.2, 2, 60 )
 
 
 #--------------------------------------------------------------

@@ -1,29 +1,18 @@
-[gd_scene load_steps=11 format=3 uid="uid://s3uyqvbunwap"]
+[gd_scene load_steps=20 format=3 uid="uid://s3uyqvbunwap"]
 
 [ext_resource type="Script" path="res://entities/slime/slime.gd" id="1_bjbtg"]
 [ext_resource type="Texture2D" uid="uid://c0ypouv7t7xqx" path="res://assets/slime.png" id="2_cnf3l"]
+[ext_resource type="Script" path="res://general_purpose/flash_sprite.gd" id="3_wh64k"]
 [ext_resource type="Script" path="res://general_purpose/character_anim.gd" id="3_xd66t"]
 [ext_resource type="Script" path="res://general_purpose/deal_damage_area.gd" id="4_wihxb"]
+[ext_resource type="Script" path="res://general_purpose/receive_damage_area.gd" id="6_iokbm"]
+[ext_resource type="PackedScene" uid="uid://k27t3r2l8jyl" path="res://entities/vfx/medium_explosion.tscn" id="7_a77rb"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ld6pk"]
 size = Vector2(6, 5)
 
-[sub_resource type="Animation" id="Animation_hiqcc"]
-resource_name = "patrol"
-length = 0.6
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("rotate/slime:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.2, 0.4),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 1,
-"values": [0, 1, 2]
-}
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ykcpp"]
+size = Vector2(41, 31)
 
 [sub_resource type="Animation" id="Animation_6t3l5"]
 length = 0.001
@@ -38,6 +27,38 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 1,
 "values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_c6pim"]
+resource_name = "attack_down"
+length = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("rotate/slime:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [5]
+}
+
+[sub_resource type="Animation" id="Animation_auoef"]
+resource_name = "attack_up"
+length = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("rotate/slime:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [4]
 }
 
 [sub_resource type="Animation" id="Animation_g84fk"]
@@ -58,16 +79,74 @@ tracks/0/keys = {
 "values": [0, 1, 2]
 }
 
+[sub_resource type="Animation" id="Animation_hiqcc"]
+resource_name = "patrol"
+length = 0.6
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("rotate/slime:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [0, 1, 2]
+}
+
+[sub_resource type="Animation" id="Animation_xj2he"]
+resource_name = "prepare_attack"
+length = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("rotate/slime:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [3]
+}
+
+[sub_resource type="Animation" id="Animation_pwjpr"]
+resource_name = "wait"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("rotate/slime:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [0, 6]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_q8cjd"]
 _data = {
 "RESET": SubResource("Animation_6t3l5"),
+"attack_down": SubResource("Animation_c6pim"),
+"attack_up": SubResource("Animation_auoef"),
 "chase": SubResource("Animation_g84fk"),
-"patrol": SubResource("Animation_hiqcc")
+"patrol": SubResource("Animation_hiqcc"),
+"prepare_attack": SubResource("Animation_xj2he"),
+"wait": SubResource("Animation_pwjpr")
 }
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0qwmk"]
+size = Vector2(4, 4)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vaxm5"]
+size = Vector2(8, 6)
 
 [node name="slime" type="CharacterBody2D"]
+collision_layer = 512
 script = ExtResource("1_bjbtg")
 metadata/_edit_lock_ = true
 
@@ -81,10 +160,23 @@ metadata/_edit_lock_ = true
 metadata/_edit_lock_ = true
 
 [node name="slime" type="Sprite2D" parent="rotate"]
-position = Vector2(0, -8)
 texture = ExtResource("2_cnf3l")
+offset = Vector2(0, -4)
 hframes = 4
 vframes = 2
+script = ExtResource("3_wh64k")
+metadata/_edit_lock_ = true
+
+[node name="attack_area" type="Area2D" parent="rotate"]
+visible = false
+collision_layer = 0
+collision_mask = 16
+monitorable = false
+metadata/_edit_lock_ = true
+
+[node name="attack_collision" type="CollisionShape2D" parent="rotate/attack_area"]
+position = Vector2(35.5, -15.5)
+shape = SubResource("RectangleShape2D_ykcpp")
 metadata/_edit_lock_ = true
 
 [node name="anim" type="AnimationPlayer" parent="."]
@@ -98,10 +190,25 @@ visible = false
 collision_layer = 32
 collision_mask = 0
 script = ExtResource("4_wihxb")
+metadata/_edit_lock_ = true
 
-[node name="damage_collision_floor" type="CollisionShape2D" parent="DealDamageArea"]
-visible = false
+[node name="damage_collision" type="CollisionShape2D" parent="DealDamageArea"]
+position = Vector2(0, -2)
 shape = SubResource("RectangleShape2D_0qwmk")
+metadata/_edit_lock_ = true
 
-[node name="damage_collision_air" type="CollisionShape2D" parent="DealDamageArea"]
+[node name="RcvDamageArea" type="Area2D" parent="."]
 visible = false
+collision_layer = 0
+collision_mask = 1024
+script = ExtResource("6_iokbm")
+metadata/_edit_lock_ = true
+
+[node name="rcv_damage_collision" type="CollisionShape2D" parent="RcvDamageArea"]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_vaxm5")
+metadata/_edit_lock_ = true
+
+[node name="medium_explosion" parent="." instance=ExtResource("7_a77rb")]
+visible = false
+position = Vector2(0, -2)

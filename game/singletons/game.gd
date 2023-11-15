@@ -2,10 +2,11 @@ extends Node
 
 var debug := true
 var state : Dictionary
-#var player : Node2D
+var player : Node2D
 
 func _ready() -> void:
 	_set_initial_gamestate()
+	#Engine.time_scale = 0.2
 
 
 func _set_initial_gamestate() -> void:
@@ -15,6 +16,8 @@ func _set_initial_gamestate() -> void:
 		hat_travel_time = 0.110,
 		hat_velocity = 200.0,
 		has_hat = false,
+		energy = 3,
+		max_energy = 3,
 	}
 	if debug:
 		_set_debug_gamestate()
@@ -24,6 +27,9 @@ func _set_debug_gamestate() -> void:
 	add_event( "received hat" )
 	state.has_hat = true
 
+func reset_state() -> void:
+	# clean up state when player dies
+	state.energy = state.max_energy
 
 #-----------------------
 # Manage events
