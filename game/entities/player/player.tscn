@@ -1,10 +1,12 @@
-[gd_scene load_steps=24 format=3 uid="uid://c60g4o60txj2n"]
+[gd_scene load_steps=26 format=3 uid="uid://c60g4o60txj2n"]
 
 [ext_resource type="Texture2D" uid="uid://ddb343vypdbc8" path="res://assets/player.png" id="1_0rcu8"]
 [ext_resource type="Script" path="res://entities/player/player.gd" id="1_2j3e6"]
 [ext_resource type="PackedScene" uid="uid://brbgvwwdypmrv" path="res://entities/player/hat.tscn" id="3_hkxws"]
 [ext_resource type="Script" path="res://general_purpose/flash_sprite.gd" id="4_d64fa"]
 [ext_resource type="Script" path="res://general_purpose/receive_damage_area.gd" id="4_u7nu4"]
+[ext_resource type="PackedScene" uid="uid://dhxi70w3vujty" path="res://entities/player/player_dust.tscn" id="6_a71yw"]
+[ext_resource type="PackedScene" uid="uid://k27t3r2l8jyl" path="res://entities/vfx/medium_explosion.tscn" id="7_e075x"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_y7rjw"]
 size = Vector2(6, 12)
@@ -215,6 +217,23 @@ tracks/0/keys = {
 "update": 1,
 "values": [34, 35, 36, 37, 38, 39, 40, 41]
 }
+tracks/1/type = "method"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0.07, 0.35),
+"transitions": PackedFloat32Array(1, 1),
+"values": [{
+"args": [0],
+"method": &"dust"
+}, {
+"args": [0],
+"method": &"dust"
+}]
+}
 
 [sub_resource type="Animation" id="Animation_efvsu"]
 resource_name = "run_nohat"
@@ -232,6 +251,23 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [13, 14, 15, 16, 17, 18, 19, 20]
+}
+tracks/1/type = "method"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0.07, 0.35),
+"transitions": PackedFloat32Array(1, 1),
+"values": [{
+"args": [0],
+"method": &"dust"
+}, {
+"args": [0],
+"method": &"dust"
+}]
 }
 
 [sub_resource type="Animation" id="Animation_6eede"]
@@ -318,10 +354,24 @@ shape = SubResource("RectangleShape2D_t7h5t")
 metadata/_edit_lock_ = true
 
 [node name="detect_hazards" type="Area2D" parent="."]
+visible = false
 collision_layer = 0
 collision_mask = 128
+metadata/_edit_lock_ = true
 
 [node name="hazards_collision" type="CollisionShape2D" parent="detect_hazards"]
 position = Vector2(0.5, -5)
 shape = SubResource("RectangleShape2D_t7h5t")
 metadata/_edit_lock_ = true
+
+[node name="dust" type="Node2D" parent="."]
+
+[node name="player_dust_1" parent="dust" instance=ExtResource("6_a71yw")]
+
+[node name="player_dust_2" parent="dust" instance=ExtResource("6_a71yw")]
+
+[node name="player_dust_3" parent="dust" instance=ExtResource("6_a71yw")]
+
+[node name="medium_explosion" parent="." instance=ExtResource("7_e075x")]
+visible = false
+z_index = 20

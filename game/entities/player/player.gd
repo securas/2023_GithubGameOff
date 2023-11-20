@@ -62,10 +62,11 @@ func catch() -> void:
 	_anim_nxt = "catch"
 
 func hat_jump() -> void:
-	_jump()
+	_jump( false )
 	_hat_jump = true
 	#velocity.y *= 2.0
 	_init_state_air()
+	dust( DustType.HAT )
 	
 #--------------------------------------------------------------
 # standard functions
@@ -73,6 +74,8 @@ func hat_jump() -> void:
 func _ready() -> void:
 	game.player = self
 	_has_hat = game.state.has_hat
+	for d in $dust.get_children():
+		d.top_level = true
 
 func _physics_process( delta : float ) -> void:
 	_update_control()
@@ -98,6 +101,8 @@ func _entity_activate( a : bool ) -> void:
 		set_physics_process( false )
 		_control_enabled = false
 		_anim.stop( true )
+		for d in $dust.get_children():
+			d.get_node( "anim" ).play( "RESET" )
 
 func _update_control() -> void:
 	_control.dir = Input.get_action_strength( "btn_right" ) - Input.get_action_strength( "btn_left" )
@@ -348,6 +353,7 @@ func _state_air( delta : float ) -> void:
 		_player_state_nxt = PlayerStates.FLOOR
 		$anim_fx.play( "land" )
 		$anim_fx.queue( "RESET" )
+		dust( DustType.LAND )
 
 
 #--------------------------------------------------------------
@@ -382,11 +388,16 @@ var _state_dead_params : Dictionary = {
 }
 func _init_state_dead() -> void:
 	_state_dead_params.dead_timer = 2.0
+	$rotate/player.hide()
+	$medium_explosion.explode()
+	
 
 func _terminate_state_dead() -> void:
 	_is_hit = false
+	$rotate/player.show()
 
 func _state_dead( delta : float ) -> void:
+	velocity *= 0
 	if _state_dead_params.dead_timer > 0:
 		_state_dead_params.dead_timer -= delta
 		if _state_dead_params.dead_timer <= 0:
@@ -429,6 +440,27 @@ func _check_hazards() -> void:
 	var hazards = _detect_hazards.get_overlapping_bodies()
 	hazards.append_array( _detect_hazards.get_overlapping_areas() )
 	if not hazards: return
+	
+	var hit_dir : Vector2
+	var first_hazard = hazards[0]
+	if first_hazard is TileMap:
+		# find nearest tile to player
+		var tilemap_hazard = first_hazard as TileMap
+		var player_coords = tilemap_hazard.local_to_map( global_position + Vector2( 0, -6 ) )
+		var used_cells = tilemap_hazard.get_used_cells( 0 )
+		var nearest_cell : Vector2i
+		var mindist : int = 1000000000
+		for c in used_cells:
+			var dist = ( c - player_coords ).length_squared()
+			if dist < mindist:
+				mindist = dist
+				nearest_cell = c
+		hit_dir = ( global_position + Vector2( 0, -6 ) - tilemap_hazard.map_to_local( nearest_cell ) ).normalized()
+	else:
+		hit_dir = ( global_position + Vector2( 0, -6 ) - first_hazard.global_position ).normalized()
+	print( " Hit Direction: ", hit_dir )
+	
+	
 	_is_hit = true
 	var nxt_energy = game.state.energy - 1 # this is to avoid triggering hud
 	nxt_energy = nxt_energy if nxt_energy >= 0 else 0
@@ -443,22 +475,52 @@ func _check_hazards() -> void:
 		_player_state_nxt = PlayerStates.HIT
 		_is_invulnerable = true
 		_invulnerable_timer = INVULNERABLE_TIMEOUT
-		_state_hit_params.hit_dir = Vector2( 0, -HIT_THROWBACK_VEL * 2 )
+		#if velocity.length() > 2:
+			#_state_hit_params.hit_dir = -velocity.normalized() * 2 * HIT_THROWBACK_VEL#Vector2( 0, -HIT_THROWBACK_VEL * 2 )
+		_state_hit_params.hit_dir = hit_dir * 2 * HIT_THROWBACK_VEL
 		sigmgr.camera_shake.emit( 0.2, 2, 60 )
 
-
+#--------------------------------------------------------------
+# VFX
+#--------------------------------------------------------------
+enum DustType { RUN, JUMP, LAND, HAT }
+func dust( type : int = DustType.RUN ):
+	var cur_dust : Sprite2D
+	for d in $dust.get_children():
+		if not d.get_node( "anim" ).is_playing():
+			cur_dust = d
+			break
+	if not cur_dust:
+		return
+	cur_dust.global_position = global_position
+	cur_dust.scale.x = _dir_cur
+	match type:
+		DustType.RUN:
+			if randf() < 0.5:
+				cur_dust.get_node( "anim" ).play( "run_1" )
+			else:
+				cur_dust.get_node( "anim" ).play( "run_2" )
+		DustType.JUMP:
+			cur_dust.get_node( "anim" ).play( "jump" )
+		DustType.LAND:
+			cur_dust.get_node( "anim" ).play( "land" )
+		DustType.HAT:
+			cur_dust.global_position += Vector2.UP * 3
+			cur_dust.get_node( "anim" ).play( "hat" )
+	cur_dust.get_node( "anim" ).queue( "RESET" )
 #--------------------------------------------------------------
 # Useful methods - Could be moved to an Actor class
 #--------------------------------------------------------------
 func _gravity( delta : float, multiplier : float = 1.0 ) -> void:
 	velocity.y = min( velocity.y + multiplier * GRAVITY * delta, TERM_VEL )
 
-func _jump() -> void:
+func _jump( has_dust : bool = true ) -> void:
 	$anim_fx.play( "jump" )
 	$anim_fx.queue( "RESET" )
 	velocity.y = -JUMP_VEL
 	_state_air_params.is_jump = true
-	#var _collided = move_and_slide()
+	if has_dust:
+		dust( DustType.JUMP )
 
 func _check_one_way_platform() -> bool:
 	var t : Transform2D = global_transform

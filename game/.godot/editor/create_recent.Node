@@ -1,14 +1,14 @@
+Node2D
+AnimationPlayer
+Sprite2D
 WorldEnvironment
 SubViewport
 SubViewportContainer
-Node2D
 Line2D
 CollisionShape2D
 Area2D
 RayCast2D
 CharacterBody2D
-AnimationPlayer
-Sprite2D
 RcvDamageArea
 DealDamageArea
 ParallaxLayer

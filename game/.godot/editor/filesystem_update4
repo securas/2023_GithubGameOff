@@ -10,13 +10,7 @@ res://entities/player/player.tscn
 res://entities/house/house.tscn
 res://world/world.tscn
 res://world/base_level.tscn
-res://entities/spike_ball/spike_ball.tscn
+res://entities/player/run_dust_1.tscn
+res://entities/player/player_dust.tscn
 res://entities/player/player.gd
-res://world/world.gd
-res://singletons/game.gd
-res://general_purpose/shake_camera.gd
-res://singletons/sigmgr.gd
-res://entities/slime/slime.gd
-res://entities/player/hat.tscn
-res://entities/small_demon/small_demon.gd
-res://entities/crab/crab.gd
+res://entities/vfx/medium_explosion.tscn

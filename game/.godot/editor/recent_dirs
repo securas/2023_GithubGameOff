@@ -1,3 +1,4 @@
+res://entities/player
 res://entities/spike_ball
 res://assets
 res://entities/small_demon
@@ -7,7 +8,6 @@ res://general_purpose
 res://entities
 res://entities/slime
 res://entities/house
-res://entities/player
 res://entities/gate
 res://entities/water
 res://entities/trees
